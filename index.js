@@ -2,7 +2,6 @@
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 const axios = require("axios");
-const sanitize = require("sanitize-filename");
 const path = require("path");
 const { execSync } = require("child_process");
 
@@ -23,7 +22,7 @@ const TARGETS = [
                         .includes("current affairs")
                 )
                 .map((a) => ({
-                    text: "Weekly " + a.textContent.trim(),
+                    text: a.textContent.trim(),
                     href: a.href,
                 }));
         },
@@ -132,8 +131,10 @@ function parseEndDateFromFilename(filename) {
     }
 
     // Download each PDF
-    for (const { text, href, endDate, timestamp } of pdfs.values()) {
-        const filename = `${timestamp} ${sanitize(text)}.pdf`;
+    for (const { href, endDate, timestamp } of pdfs.values()) {
+        const filename = `${timestamp} ${endDate.getFullYear()}-${String(
+            endDate.getMonth() + 1
+        ).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}.pdf`;
         const filepath = path.join(DOWNLOAD_DIR, filename);
 
         // Skip if already downloaded
